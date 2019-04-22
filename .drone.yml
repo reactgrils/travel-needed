@@ -1,0 +1,35 @@
+pipeline:
+  scp:
+    image: appleboy/drone-scp
+    pull: true
+    host: 
+      - travel-needed.tomas.website
+    port: 22
+    username: root
+    user: root
+    secrets: [ ssh_password ]
+    target: /root
+    source:
+      - /drone/src/github.com/reactgrils/travel-needed
+    when:
+      branch: master
+
+  ssh:
+    image: appleboy/drone-ssh
+    host: 
+      - travel-needed.tomas.website
+    username: root
+    user: root
+    secrets: [ ssh_password ]
+    command_timeout: 600
+    script:
+      - . /root/.nvm/nvm.sh && nvm use 10.9.0
+      - mkdir -p /var/www/html/travel-needed.tomas.website
+      - cd /root/drone/src/github.com/reactgrils/travel-needed
+      - yarn install
+      - yarn build
+      - cp -a build/* /var/www/html/travel-needed.tomas.website
+      - cd /root
+      - rm -rf /root/drone
+    when:
+      branch: master
